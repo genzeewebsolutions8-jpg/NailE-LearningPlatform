@@ -5,17 +5,30 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+<<<<<<< HEAD
     "dev": "nodemon index.js"
+=======
+    "dev": "nodemon index.js",
+    "create-admin": "node scripts/createAdmin.js"
+>>>>>>> d050c08 (Update for frontend of login and signup for Admin, Tutor and End User without database)
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+<<<<<<< HEAD
+=======
+    "bcryptjs": "^2.4.3",
+>>>>>>> d050c08 (Update for frontend of login and signup for Admin, Tutor and End User without database)
     "body-parser": "^2.2.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+<<<<<<< HEAD
+=======
+    "jsonwebtoken": "^9.0.2",
+>>>>>>> d050c08 (Update for frontend of login and signup for Admin, Tutor and End User without database)
     "mongoose": "^9.1.4"
   },
   "devDependencies": {
