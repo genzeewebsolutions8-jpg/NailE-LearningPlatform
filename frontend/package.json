@@ -1,6 +1,7 @@
 {
   "name": "frontend",
   "version": "1.0.0",
+<<<<<<< HEAD
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -8,16 +9,35 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
+=======
+  "description": "NailE Learning Platform - Frontend",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+>>>>>>> d050c08 (Update for frontend of login and signup for Admin, Tutor and End User without database)
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+<<<<<<< HEAD
   "type": "commonjs",
   "dependencies": {
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
   },
   "devDependencies": {
+=======
+  "dependencies": {
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "react-router-dom": "^6.26.0",
+    "axios": "^1.7.7"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+>>>>>>> d050c08 (Update for frontend of login and signup for Admin, Tutor and End User without database)
     "vite": "^7.3.1"
   }
 }
