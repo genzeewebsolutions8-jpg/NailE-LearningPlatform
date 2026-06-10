@@ -26,6 +26,10 @@ export default function SuperAdminDashboard() {
     const [newSession, setNewSession] = useState({
         title: "", topic: "", seats: "", fees: "", instructorId: "", sessionDate: ""
     });
+    const [galleryItems, setGalleryItems] = useState([]);
+    const [newGalleryInstructor, setNewGalleryInstructor] = useState("");
+    const [newGalleryFile, setNewGalleryFile] = useState(null);
+    const [galleryUploading, setGalleryUploading] = useState(false);
     const [approvedInstructors, setApprovedInstructors] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -35,14 +39,15 @@ export default function SuperAdminDashboard() {
 
     const fetchAdminData = async () => {
         try {
-            const [statsRes, pendingCoursesRes, allVideosRes, pendingInstructorsRes, sessionsRes, approvedInstructorsRes, landingVideoRes] = await Promise.all([
+            const [statsRes, pendingCoursesRes, allVideosRes, pendingInstructorsRes, sessionsRes, approvedInstructorsRes, landingVideoRes, galleryRes] = await Promise.all([
                 api.get("/admin/stats"),
                 api.get("/admin/courses/pending"),
                 api.get("/videos"),
                 api.get("/admin/instructors/pending"),
                 api.get("/live-sessions"),
                 api.get("/admin/instructors/approved"),
-                api.get("/landing-video")
+                api.get("/landing-video"),
+                api.get("/gallery")
             ]);
 
             const allVideos = allVideosRes.data.videos || allVideosRes.data || [];
@@ -58,6 +63,7 @@ export default function SuperAdminDashboard() {
             setLiveSessions(sessionsRes.data.sessions || sessionsRes.data || []);
             setApprovedInstructors(approvedInstructorsRes.data.instructors || []);
             setLandingVideo(landingVideoRes.data);
+            setGalleryItems(galleryRes.data || []);
         } catch (error) {
             console.error("Failed to load super admin data", error);
         } finally {
@@ -127,6 +133,39 @@ export default function SuperAdminDashboard() {
             showToast("Video deleted", "success");
         } catch (error) {
             showToast("Video deletion failed", "error");
+        }
+    };
+
+    const handleGalleryUpload = async (e) => {
+        e.preventDefault();
+        if (!newGalleryFile || !newGalleryInstructor) return;
+        const formData = new FormData();
+        formData.append("image", newGalleryFile);
+        formData.append("instructorId", newGalleryInstructor);
+        setGalleryUploading(true);
+        try {
+            await api.post("/gallery", formData, {
+                headers: { "Content-Type": "multipart/form-data" }
+            });
+            setNewGalleryFile(null);
+            setNewGalleryInstructor("");
+            showToast("Gallery item added!", "success");
+            fetchAdminData();
+        } catch (error) {
+            showToast("Gallery upload failed", "error");
+        } finally {
+            setGalleryUploading(false);
+        }
+    };
+
+    const handleGalleryDelete = async (id) => {
+        if (!window.confirm("Delete this gallery image?")) return;
+        try {
+            await api.delete(`/gallery/${id}`);
+            showToast("Image deleted", "success");
+            fetchAdminData();
+        } catch (error) {
+            showToast("Deletion failed", "error");
         }
     };
 
@@ -282,6 +321,54 @@ export default function SuperAdminDashboard() {
                             </form>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            {/* Gallery Management */}
+            <div className="mt-8">
+                <h3 className="mb-4">Landing Page Gallery Management</h3>
+                <div className="card">
+                    <form onSubmit={handleGalleryUpload} className="mb-8" style={{ display: "flex", gap: "1rem", alignItems: "flex-end" }}>
+                        <div style={{ flex: 1 }}>
+                            <label className="form-label">Instructor</label>
+                            <select className="form-input" value={newGalleryInstructor} onChange={e => setNewGalleryInstructor(e.target.value)} required>
+                                <option value="" disabled>Select Instructor...</option>
+                                {approvedInstructors.map(inst => (
+                                    <option key={inst._id} value={inst._id}>{inst.firstName} {inst.lastName}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            <label className="form-label">Upload Artwork</label>
+                            <input type="file" className="form-input" accept="image/*" onChange={e => setNewGalleryFile(e.target.files[0])} required />
+                        </div>
+                        <button type="submit" className="btn btn-primary" disabled={!newGalleryFile || !newGalleryInstructor || galleryUploading} style={{ padding: "0.75rem 2rem" }}>
+                            {galleryUploading ? "Uploading..." : "Add to Gallery"}
+                        </button>
+                    </form>
+
+                    <h4 className="mb-4">Current Gallery</h4>
+                    <div style={{
+                        display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+                        gap: "1.5rem"
+                    }}>
+                        {galleryItems.map(item => (
+                            <div key={item._id} className="card-premium" style={{ overflow: "hidden", padding: "1rem", position: "relative" }}>
+                                <img 
+                                    src={`http://localhost:5001${item.imageUrl}`} 
+                                    alt={item.instructorId ? `Art by ${item.instructorId.firstName}` : `Art by ${item.artistName || 'Artist'}`}
+                                    style={{ width: "100%", height: "150px", objectFit: "cover", borderRadius: "8px", marginBottom: "0.5rem" }}
+                                />
+                                <h4 style={{ fontSize: "1rem", textAlign: "center", marginBottom: "0.5rem" }}>
+                                    {item.instructorId ? `${item.instructorId.firstName} ${item.instructorId.lastName}` : (item.artistName || 'Unknown Artist')}
+                                </h4>
+                                <button onClick={() => handleGalleryDelete(item._id)} className="btn w-full" style={{ color: "red", borderColor: "red", padding: "0.5rem" }}>
+                                    Remove
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                    {galleryItems.length === 0 && <p className="text-muted text-center py-8">No items in gallery yet.</p>}
                 </div>
             </div>
         </div>

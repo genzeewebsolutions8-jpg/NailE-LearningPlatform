@@ -5,6 +5,7 @@ import api from "../api";
 
 export default function Landing() {
     const [video, setVideo] = useState(null);
+    const [gallery, setGallery] = useState([]);
 
     useEffect(() => {
         const fetchVideo = async () => {
@@ -15,7 +16,16 @@ export default function Landing() {
                 console.error("Failed to load branding assets", error);
             }
         };
+        const fetchGallery = async () => {
+            try {
+                const { data } = await api.get("/gallery");
+                setGallery(data);
+            } catch (error) {
+                console.error("Failed to fetch gallery", error);
+            }
+        };
         fetchVideo();
+        fetchGallery();
     }, []);
 
     return (
@@ -102,6 +112,37 @@ export default function Landing() {
                     </div>
                 </div>
             </section>
+
+            {/* Gallery Section */}
+            {gallery && gallery.length > 0 && (
+                <section style={{ padding: "8rem 0", backgroundColor: "#fff" }}>
+                    <div className="container">
+                        <div style={{ textAlign: "center", marginBottom: "5rem" }}>
+                            <h2 style={{ fontSize: "3rem", fontWeight: "900", marginBottom: "1.5rem" }}>Student Gallery</h2>
+                            <p style={{ color: "var(--text-muted)", fontSize: "1.2rem", maxWidth: "600px", margin: "0 auto" }}>
+                                Explore world-class artistry from our professional nail artists.
+                            </p>
+                        </div>
+                        <div style={{
+                            display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+                            gap: "2rem"
+                        }}>
+                            {gallery.map(item => (
+                                <div key={item._id} className="card-premium" style={{ overflow: "hidden", padding: "1rem" }}>
+                                    <img 
+                                        src={`http://localhost:5001${item.imageUrl}`} 
+                                        alt={item.instructorId ? `Art by ${item.instructorId.firstName}` : `Art by ${item.artistName || 'Artist'}`}
+                                        style={{ width: "100%", height: "250px", objectFit: "cover", borderRadius: "12px", marginBottom: "1rem" }}
+                                    />
+                                    <h3 style={{ fontSize: "1.2rem", textAlign: "center" }}>
+                                        {item.instructorId ? `${item.instructorId.firstName} ${item.instructorId.lastName}` : (item.artistName || 'Unknown Artist')}
+                                    </h3>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
 
             {/* Premium CTA */}
             <section className="container" style={{ marginBottom: "8rem" }}>

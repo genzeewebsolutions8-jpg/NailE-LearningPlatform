@@ -42,6 +42,7 @@ app.use("/api/admin", require("./routes/adminRoutes"));
 app.use("/api/feedback", require("./routes/feedbackRoutes"));
 app.use("/api/payment", require("./routes/paymentRoutes"));
 app.use("/api/landing-video", require("./routes/landingVideoRoutes"));
+app.use("/api/gallery", require("./routes/galleryRoutes"));
 
 // ─── Socket.io Live Session Signaling ──────────────────────────────────────
 // roomPeers: { sessionId: [ { socketId, userId, name, role } ] }

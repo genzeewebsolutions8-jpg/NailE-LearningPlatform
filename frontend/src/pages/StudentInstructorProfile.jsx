@@ -7,10 +7,11 @@ export default function StudentInstructorProfile() {
     const { name } = useParams();
     const instructorName = decodeURIComponent(name);
 
-    const [activeTab, setActiveTab] = useState("Posts");
+    const [activeTab, setActiveTab] = useState("Gallery");
     const [courses, setCourses] = useState([]);
     const [instructorData, setInstructorData] = useState(null);
     const [feedback, setFeedback] = useState([]);
+    const [gallery, setGallery] = useState([]);
     const [loading, setLoading] = useState(true);
 
     // Derived data for missing profile details
@@ -34,6 +35,10 @@ export default function StudentInstructorProfile() {
                         ratingCount: feedbackRes.data.ratingCount
                     });
                     setFeedback(feedbackRes.data.feedback || []);
+                    
+                    // 2.5 Fetch gallery items
+                    const galleryRes = await api.get(`/gallery/instructor/${instructor._id}`);
+                    setGallery(galleryRes.data || []);
                 }
 
                 // 3. Fetch courses for this instructor
@@ -96,7 +101,7 @@ export default function StudentInstructorProfile() {
             {/* Tabs */}
             <div className="flex gap-2 mb-8" style={{ backgroundColor: "#F9FAFB", padding: "0.5rem", borderRadius: "12px", border: "1px solid var(--border-color)" }}>
                 {[
-                    { name: "Posts", icon: LayoutGrid },
+                    { name: "Gallery", icon: LayoutGrid },
                     { name: "Courses", icon: PlayCircle },
                     { name: "Reviews", icon: MessageSquare }
                 ].map(tab => (
@@ -116,17 +121,29 @@ export default function StudentInstructorProfile() {
                 ))}
             </div>
 
-            {/* Posts Grid Panel */}
-            {activeTab === "Posts" && (
+            {/* Gallery Grid Panel */}
+            {activeTab === "Gallery" && (
                 <div>
-                    <button className="btn mb-8 flex justify-center items-center gap-2" style={{ width: "100%", backgroundColor: "var(--primary)", opacity: 0.9, color: "white", padding: "1rem", borderRadius: "12px" }}>
-                        <span>+</span> Create New Post
-                    </button>
-
-                    <div className="card text-center text-muted py-12">
-                        <LayoutGrid size={48} style={{ margin: "0 auto 1rem auto", opacity: 0.5 }} />
-                        <p>No posts available.</p>
-                    </div>
+                    {gallery.length === 0 ? (
+                        <div className="card text-center text-muted py-12">
+                            <LayoutGrid size={48} style={{ margin: "0 auto 1rem auto", opacity: 0.5 }} />
+                            <p>No gallery artwork available yet.</p>
+                        </div>
+                    ) : (
+                        <div style={{
+                            display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", gap: "1.5rem"
+                        }}>
+                            {gallery.map(item => (
+                                <div key={item._id} className="card-premium" style={{ overflow: "hidden", padding: "1rem" }}>
+                                    <img 
+                                        src={`http://localhost:5001${item.imageUrl}`} 
+                                        alt={`Art by ${instructorName}`}
+                                        style={{ width: "100%", height: "200px", objectFit: "cover", borderRadius: "12px" }}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             )}
 
