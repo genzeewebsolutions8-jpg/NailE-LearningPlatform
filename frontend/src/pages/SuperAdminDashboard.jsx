@@ -206,7 +206,7 @@ export default function SuperAdminDashboard() {
                 </div>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem" }}>
+            <div className="responsive-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem" }}>
                 
                 {/* Pending Actions */}
                 <div>
@@ -286,7 +286,7 @@ export default function SuperAdminDashboard() {
                                     ))}
                                 </select>
                             </div>
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                            <div className="responsive-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                                 <div className="form-group">
                                     <label className="form-label">Capacity</label>
                                     <input type="number" className="form-input" placeholder="Capacity" value={newSession.seats} onChange={e => setNewSession({...newSession, seats: e.target.value})} required />

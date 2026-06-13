@@ -11,7 +11,7 @@ async function testGallery() {
         const loginRes = await fetch("http://127.0.0.1:5001/api/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: "admin@nailacademy.com", password: "adminpassword123" })
+            body: JSON.stringify({ email: "dishanailsacademy@gmail.com", password: "Hardik@0504" })
         });
         const loginData = await loginRes.json();
         

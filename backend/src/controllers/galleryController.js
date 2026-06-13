@@ -7,8 +7,13 @@ const path = require("path");
 // @access  Admin/SuperAdmin
 const addGalleryItem = async (req, res) => {
     try {
-        const { instructorId } = req.body;
+        let { instructorId } = req.body;
         
+        // If the user is an instructor, they can only upload to their own gallery
+        if (req.user && req.user.role === "instructor") {
+            instructorId = req.user.id;
+        }
+
         if (!instructorId) {
             return res.status(400).json({ message: "Instructor is required" });
         }
@@ -72,6 +77,13 @@ const deleteGalleryItem = async (req, res) => {
 
         if (!galleryItem) {
             return res.status(404).json({ message: "Gallery item not found" });
+        }
+
+        // Check ownership if the user is an instructor
+        if (req.user && req.user.role === "instructor") {
+            if (galleryItem.instructorId.toString() !== req.user.id) {
+                return res.status(403).json({ message: "You are not authorized to delete this gallery item" });
+            }
         }
 
         // Delete from local filesystem

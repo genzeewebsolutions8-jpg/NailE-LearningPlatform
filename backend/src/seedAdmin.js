@@ -9,29 +9,29 @@ mongoose.connect(process.env.MONGO_URI)
         console.log("MongoDB Connected...");
 
         // Check if admin already exists
-        const existingAdmin = await User.findOne({ email: "admin@nailacademy.com" });
+        const existingAdmin = await User.findOne({ email: "dishanailsacademy@gmail.com" });
+        const hashedPassword = await bcrypt.hash("Hardik@0504", 10);
 
         if (existingAdmin) {
-            console.log("Admin user already exists. Credentials:");
-            console.log("Email: admin@nailacademy.com");
-            console.log("Password: adminpassword123");
+            existingAdmin.password = hashedPassword;
+            existingAdmin.role = "admin";
+            await existingAdmin.save();
+            console.log("Admin user updated successfully with password: Hardik@0504");
             process.exit();
         }
 
         // Create new admin user
-        const hashedPassword = await bcrypt.hash("adminpassword123", 10);
-
         const admin = await User.create({
             firstName: "Super",
             lastName: "Admin",
-            email: "admin@nailacademy.com",
+            email: "dishanailsacademy@gmail.com",
             password: hashedPassword,
             role: "admin",
         });
 
         console.log("Admin user successfully created!");
-        console.log("Email: admin@nailacademy.com");
-        console.log("Password: adminpassword123");
+        console.log("Email: dishanailsacademy@gmail.com");
+        console.log("Password: Hardik@0504");
 
         process.exit();
     })

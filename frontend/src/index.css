@@ -159,3 +159,40 @@ h1, h2, h3, h4, h5, h6 {
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
+
+/* Mobile Responsiveness Utilities */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1rem;
+  }
+  
+  .responsive-flex {
+    flex-direction: column !important;
+    gap: 1rem !important;
+  }
+  
+  .responsive-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .card-premium {
+    padding: 1.5rem !important;
+  }
+
+  h1 { font-size: 2rem !important; }
+  h2 { font-size: 1.5rem !important; }
+
+  /* Navbar adjustments */
+  .navbar-content {
+    flex-direction: column !important;
+    height: auto !important;
+    padding: 1rem 0 !important;
+    align-items: center !important;
+    gap: 1rem !important;
+  }
+
+  /* Specific overrides */
+  .hide-on-mobile {
+    display: none !important;
+  }
+}
