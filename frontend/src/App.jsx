@@ -19,6 +19,7 @@ import LiveSession from "./pages/LiveSession";
 import AdminDashboard from "./pages/AdminDashboard"; // Which acts as Instructor Dashboard
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import Profile from "./pages/Profile";
+import ForgotPassword from "./pages/ForgotPassword";
 
 const ProtectedRoute = ({ children, role }) => {
   const { user } = useAuth();
@@ -181,6 +182,7 @@ export default function App() {
         } />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
         {/* Student Routes */}
         <Route path="/student/dashboard" element={

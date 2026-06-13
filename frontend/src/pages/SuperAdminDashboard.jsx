@@ -169,6 +169,18 @@ export default function SuperAdminDashboard() {
         }
     };
 
+    const handleDeleteInstructor = async (id, name) => {
+        if (!window.confirm(`Are you sure you want to permanently remove instructor ${name}?`)) return;
+        try {
+            await api.delete(`/admin/instructors/${id}`);
+            fetchAdminData();
+            showToast("Instructor removed successfully", "success");
+        } catch (error) {
+            console.error("Failed to delete instructor", error);
+            showToast(error.response?.data?.message || "Failed to remove instructor", "error");
+        }
+    };
+
     if (loading) return <div className="container mt-8">Loading...</div>;
 
     return (
@@ -369,6 +381,34 @@ export default function SuperAdminDashboard() {
                         ))}
                     </div>
                     {galleryItems.length === 0 && <p className="text-muted text-center py-8">No items in gallery yet.</p>}
+                </div>
+            </div>
+
+            {/* Approved Instructors Management */}
+            <div className="mt-8">
+                <h3 className="mb-4">Approved Instructors Management</h3>
+                <div className="card">
+                    {approvedInstructors.length === 0 ? (
+                        <p className="text-muted text-center py-8">No approved instructors found.</p>
+                    ) : (
+                        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                            {approvedInstructors.map(inst => (
+                                <div key={inst._id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1rem", borderBottom: "1px solid var(--border-light)" }}>
+                                    <div>
+                                        <h4 style={{ margin: 0, fontSize: "1.1rem", fontWeight: "700" }}>{inst.firstName} {inst.lastName}</h4>
+                                        <p className="text-muted" style={{ margin: 0, fontSize: "0.875rem" }}>{inst.email}</p>
+                                    </div>
+                                    <button 
+                                        onClick={() => handleDeleteInstructor(inst._id, `${inst.firstName} ${inst.lastName}`)} 
+                                        className="btn" 
+                                        style={{ color: "#EF4444", borderColor: "#EF4444", padding: "0.5rem 1rem", fontSize: "0.875rem" }}
+                                    >
+                                        Remove Instructor
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
