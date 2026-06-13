@@ -2,7 +2,7 @@ const User = require("../models/User");
 const OtpToken = require("../models/OtpToken");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { sendOtpEmail } = require("../utils/emailService");
+const { sendOtpEmail, sendResetPasswordEmail } = require("../utils/emailService");
 
 // ─── Send OTP ───────────────────────────────────────────────────────────────
 exports.sendOtp = async (req, res) => {
@@ -197,5 +197,79 @@ exports.login = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+// ─── Forgot Password ────────────────────────────────────────────────────────
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: "Email is required" });
+
+    // Verify user exists
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(404).json({ message: "No account found with this email address." });
+    }
+
+    // Generate 6-digit reset OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Hash the OTP
+    const salt = await bcrypt.genSalt(10);
+    const hashedOtp = await bcrypt.hash(otp, salt);
+
+    // Save/update OTP
+    await OtpToken.deleteMany({ email: email.toLowerCase() });
+    await OtpToken.create({ email: email.toLowerCase(), otp: hashedOtp });
+
+    // Send email
+    await sendResetPasswordEmail(user.email, otp);
+
+    res.status(200).json({ message: "Reset code sent to your email. Valid for 10 minutes." });
+  } catch (error) {
+    console.error("forgotPassword error:", error);
+    res.status(500).json({ error: "Failed to send reset code. Please try again." });
+  }
+};
+
+// ─── Reset Password ─────────────────────────────────────────────────────────
+exports.resetPassword = async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({ message: "Email, code, and new password are required" });
+    }
+
+    // Check OTP record
+    const record = await OtpToken.findOne({ email: email.toLowerCase() });
+    if (!record) {
+      return res.status(400).json({ message: "Reset code has expired or not found. Please request a new one." });
+    }
+
+    // Compare OTP
+    const isMatch = await bcrypt.compare(otp.trim(), record.otp);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid reset code. Please check and try again." });
+    }
+
+    // Clear OTP
+    await OtpToken.deleteMany({ email: email.toLowerCase() });
+
+    // Find User & Update Password
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).json({ message: "Password reset successfully. You can now login with your new password." });
+  } catch (error) {
+    console.error("resetPassword error:", error);
+    res.status(500).json({ error: "Failed to reset password. Please try again." });
   }
 };

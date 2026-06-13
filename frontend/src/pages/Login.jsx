@@ -66,7 +66,7 @@ export default function Login() {
                     <div className="form-group">
                         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.25rem" }}>
                             <label className="form-label" style={{ fontWeight: "750", color: "var(--text-main)" }}>Password</label>
-                            <Link to="#" style={{ fontSize: "0.8rem", color: "var(--primary)", fontWeight: "700" }}>Forgot Access?</Link>
+                            <Link to="/forgot-password" style={{ fontSize: "0.8rem", color: "var(--primary)", fontWeight: "700" }}>Forgot Access?</Link>
                         </div>
                         <div style={{ position: "relative" }}>
                             <Lock size={18} style={{ position: "absolute", left: "1.125rem", top: "50%", transform: "translateY(-50%)", color: "var(--text-light)" }} />
