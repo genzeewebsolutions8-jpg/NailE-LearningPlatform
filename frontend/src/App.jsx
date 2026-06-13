@@ -65,13 +65,13 @@ export default function App() {
       <nav className="navbar" style={{ backgroundColor: "#1C1C1E" }}>
         <div className="container navbar-content flex justify-between items-center" style={{ height: "4.5rem" }}>
 
-          <div className="flex items-center gap-8">
+          <div className="flex responsive-flex items-center gap-4">
             <Link to="/" style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "white", textDecoration: "none" }}>
               <img src={logo} alt="Nail Academy Logo" style={{ height: "48px", objectFit: "contain", borderRadius: "8px" }} />
             </Link>
 
             {user && (
-              <div className="flex items-center" style={{ marginLeft: "2rem", gap: "2rem" }}>
+              <div className="flex responsive-flex items-center" style={{ gap: "1.5rem" }}>
                 <Link to={`/${['admin', 'instructor'].includes(user.role) ? 'admin' : 'student'}/dashboard`} style={getLinkStyle(`/${['admin', 'instructor'].includes(user.role) ? 'admin' : 'student'}/dashboard`)}>Dashboard</Link>
                 {user.role !== 'instructor' && (
                   <Link to="/student/instructors" style={getLinkStyle("/student/instructors")}>Instructors</Link>
@@ -82,7 +82,7 @@ export default function App() {
             )}
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex responsive-flex items-center gap-4">
             {user ? (
               <>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
@@ -191,12 +191,12 @@ export default function App() {
           </ProtectedRoute>
         } />
         <Route path="/student/instructors" element={
-          <ProtectedRoute role={["student", "admin"]}>
+          <ProtectedRoute role={["student", "admin", "instructor"]}>
             <StudentInstructors />
           </ProtectedRoute>
         } />
         <Route path="/student/instructor/:name" element={
-          <ProtectedRoute role={["student", "admin"]}>
+          <ProtectedRoute role={["student", "admin", "instructor"]}>
             <StudentInstructorProfile />
           </ProtectedRoute>
         } />

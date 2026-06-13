@@ -190,7 +190,9 @@ exports.login = async (req, res) => {
       token,
       user: {
         id: user._id,
-        name: user.firstName,
+        name: `${user.firstName} ${user.lastName || ""}`.trim(),
+        firstName: user.firstName,
+        lastName: user.lastName,
         email: user.email,
         role: user.role,
       },

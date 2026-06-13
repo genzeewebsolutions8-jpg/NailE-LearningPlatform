@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Plus, Video, Users, BookOpen, Trash2, Clock, CheckCircle, Search, Filter, TrendingUp, MoreVertical } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Plus, Video, Users, BookOpen, Trash2, Clock, CheckCircle, Search, Filter, TrendingUp, MoreVertical, Image as ImageIcon } from "lucide-react";
 import api from "../api";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
@@ -19,14 +20,32 @@ export default function AdminDashboard() {
     const [videoFiles, setVideoFiles] = useState([]);
     const [thumbnailFile, setThumbnailFile] = useState(null);
 
+    const [galleryItems, setGalleryItems] = useState([]);
+    const [showGalleryUpload, setShowGalleryUpload] = useState(false);
+    const [galleryFile, setGalleryFile] = useState(null);
+
     useEffect(() => {
         fetchInstructorVideos();
-    }, []);
+        if (user?._id || user?.id) {
+            fetchGalleryItems();
+        }
+    }, [user]);
+
+    const fetchGalleryItems = async () => {
+        try {
+            console.log("Fetching gallery for user:", user);
+            const { data } = await api.get(`/gallery/instructor/${user._id || user.id}`);
+            console.log("Fetched gallery items:", data);
+            setGalleryItems(data);
+        } catch (error) {
+            console.error("Failed to fetch gallery items", error);
+        }
+    };
 
     const fetchInstructorVideos = async () => {
         try {
             const { data } = await api.get("/videos");
-            const instructorVideos = (data.videos || data).filter(v => v.instructorId?._id === user?._id || v.instructorId === user?._id);
+            const instructorVideos = (data.videos || data).filter(v => v.instructorId?._id === (user?._id || user?.id) || v.instructorId === (user?._id || user?.id));
             setVideos(instructorVideos);
         } catch (error) {
             console.error("Failed to load creative assets", error);
@@ -80,6 +99,40 @@ export default function AdminDashboard() {
         }
     };
 
+    const handleGalleryUpload = async (e) => {
+        e.preventDefault();
+        if (!galleryFile) return;
+        setLoading(true);
+        try {
+            const formData = new FormData();
+            formData.append("image", galleryFile);
+            formData.append("instructorId", user._id || user.id);
+
+            await api.post("/gallery", formData, {
+                headers: { "Content-Type": "multipart/form-data" }
+            });
+            setShowGalleryUpload(false);
+            setGalleryFile(null);
+            fetchGalleryItems();
+            showToast("Artwork added to portfolio successfully", "success");
+        } catch (error) {
+            showToast(error.response?.data?.message || "Failed to upload artwork", "error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleGalleryDelete = async (id) => {
+        if (!window.confirm("Remove this artwork from your portfolio?")) return;
+        try {
+            await api.delete(`/gallery/${id}`);
+            fetchGalleryItems();
+            showToast("Artwork removed", "success");
+        } catch (error) {
+            showToast("Failed to remove artwork", "error");
+        }
+    };
+
     if (loading) return (
         <div style={{ minHeight: "80vh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: "1rem" }}>
             <div className="animate-spin" style={{ width: "40px", height: "40px", border: "4px solid var(--primary-light)", borderTopColor: "var(--primary)", borderRadius: "50%" }}></div>
@@ -96,12 +149,17 @@ export default function AdminDashboard() {
                         <div style={{ color: "var(--primary)", fontWeight: "800", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: "0.5rem" }}>Instructor Console</div>
                         <h1 style={{ fontSize: "2.75rem", fontWeight: "900", color: "var(--text-main)", letterSpacing: "-0.03em" }}>Creative Studio</h1>
                     </div>
-                    <button onClick={() => setShowUpload(true)} className="btn btn-primary" style={{ padding: "1rem 2rem", fontSize: "1rem" }}>
-                        <Plus size={20} /> Produce New Course
-                    </button>
+                    <div className="flex gap-4">
+                        <Link to={`/student/instructor/${encodeURIComponent(user?.name || user?.firstName || 'Instructor')}`} className="btn btn-outline" style={{ padding: "1rem 2rem", fontSize: "1rem" }}>
+                            My Public Profile
+                        </Link>
+                        <button onClick={() => setShowUpload(true)} className="btn btn-primary" style={{ padding: "1rem 2rem", fontSize: "1rem" }}>
+                            <Plus size={20} /> Produce New Course
+                        </button>
+                    </div>
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "2rem", marginBottom: "4rem" }}>
+                <div className="responsive-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "2rem", marginBottom: "4rem" }}>
                     <CreativeStat 
                         title="Total Students" 
                         value={videos.reduce((acc, v) => acc + (v.enrolledStudents?.length || 0), 0)} 
@@ -143,6 +201,33 @@ export default function AdminDashboard() {
                         )}
                     </div>
                 </div>
+
+                <div className="card-premium mt-8" style={{ padding: "2.5rem" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "3rem" }}>
+                        <h3 style={{ fontSize: "1.25rem", fontWeight: "900" }}>My Portfolio / Gallery</h3>
+                        <button onClick={() => setShowGalleryUpload(true)} className="btn btn-outline" style={{ padding: "0.5rem 1.5rem", fontSize: "0.95rem" }}>
+                            <Plus size={18} /> Add Artwork
+                        </button>
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "1.5rem" }}>
+                        {galleryItems.map(item => (
+                            <div key={item._id} style={{ position: "relative", borderRadius: "12px", overflow: "hidden", aspectRatio: "1/1", border: "1px solid var(--border-light)" }}>
+                                <img src={item.imageUrl} alt="Artwork" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                <button onClick={() => handleGalleryDelete(item._id)} style={{ position: "absolute", top: "0.5rem", right: "0.5rem", background: "rgba(239, 68, 68, 0.9)", color: "white", border: "none", borderRadius: "50%", width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", zIndex: 10 }}>
+                                    <Trash2 size={16} />
+                                </button>
+                            </div>
+                        ))}
+                        {galleryItems.length === 0 && (
+                            <div style={{ gridColumn: "1/-1", textAlign: "center", padding: "3rem 0", color: "var(--text-muted)" }}>
+                                <ImageIcon size={48} style={{ opacity: 0.1, marginBottom: "1rem" }} />
+                                <p style={{ fontSize: "1rem", fontWeight: "500" }}>Your gallery is empty. Upload your first artwork.</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
             </div>
 
             {showUpload && (
@@ -164,7 +249,7 @@ export default function AdminDashboard() {
                                 <textarea className="form-input" placeholder="Course Description" style={{ height: "100px", resize: "none" }} value={newVideo.description} onChange={e => setNewVideo({...newVideo, description: e.target.value})} required />
                             </div>
                             
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
+                            <div className="responsive-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
                                 <div className="form-group">
                                     <label style={{ fontWeight: "750", display: "block", marginBottom: "0.5rem" }}>Video Content (Multiple)</label>
                                     <input type="file" className="form-input" multiple accept="video/*" onChange={e => setVideoFiles(e.target.files)} required style={{ paddingTop: "0.6rem" }} />
@@ -183,6 +268,29 @@ export default function AdminDashboard() {
 
                             <button type="submit" className="btn btn-primary" style={{ padding: "1.125rem", marginTop: "1rem", fontWeight: "800" }}>
                                 {loading ? "Uploading Production..." : "Initiate Production"}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {showGalleryUpload && (
+                <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
+                    <div className="card-premium" style={{ width: "100%", maxWidth: "500px", padding: "3rem", position: "relative" }}>
+                        <button onClick={() => setShowGalleryUpload(false)} style={{ position: "absolute", top: "2rem", right: "2rem", background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)" }}>
+                            <Trash2 size={24} />
+                        </button>
+                        <h2 style={{ fontSize: "1.75rem", fontWeight: "900", marginBottom: "0.5rem" }}>Upload Artwork</h2>
+                        <p style={{ color: "var(--text-muted)", marginBottom: "2rem" }}>Add high-quality images to your public portfolio.</p>
+                        
+                        <form onSubmit={handleGalleryUpload} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+                            <div className="form-group">
+                                <label style={{ fontWeight: "750", display: "block", marginBottom: "0.5rem" }}>Select Image File</label>
+                                <input type="file" className="form-input" accept="image/*" onChange={e => setGalleryFile(e.target.files[0])} required style={{ paddingTop: "0.6rem" }} />
+                            </div>
+
+                            <button type="submit" className="btn btn-primary" style={{ padding: "1rem", marginTop: "1rem", fontWeight: "800" }} disabled={loading}>
+                                {loading ? "Uploading..." : "Publish Artwork"}
                             </button>
                         </form>
                     </div>

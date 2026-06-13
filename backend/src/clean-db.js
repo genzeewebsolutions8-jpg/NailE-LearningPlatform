@@ -34,18 +34,18 @@ const cleanDatabase = async () => {
         }
 
         console.log("Re-seeding Admin User...");
-        const hashedPassword = await bcrypt.hash("adminpassword123", 10);
+        const hashedPassword = await bcrypt.hash("Hardik@0504", 10);
         await User.create({
             firstName: "Super",
             lastName: "Admin",
-            email: "admin@nailacademy.com",
+            email: "dishanailsacademy@gmail.com",
             password: hashedPassword,
             role: "admin",
         });
 
         console.log("Admin user successfully recreated!");
-        console.log("Email: admin@nailacademy.com");
-        console.log("Password: adminpassword123");
+        console.log("Email: dishanailsacademy@gmail.com");
+        console.log("Password: Hardik@0504");
 
         console.log("Database cleanup complete.");
         process.exit(0);

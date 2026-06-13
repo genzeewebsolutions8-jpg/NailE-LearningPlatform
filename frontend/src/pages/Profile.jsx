@@ -75,7 +75,7 @@ export default function Profile() {
                     <ArrowLeft size={18} /> Back to Home
                 </Link>
 
-                <div className="card-premium" style={{ display: "grid", gridTemplateColumns: "1fr 1.8fr", gap: "0", overflow: "hidden", minHeight: "600px" }}>
+                <div className="card-premium responsive-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1.8fr", gap: "0", overflow: "hidden", minHeight: "600px" }}>
                     {/* Left Panel: Profile Quick Info */}
                     <div style={{ 
                         backgroundColor: "#FBFBFC", 
@@ -164,7 +164,7 @@ export default function Profile() {
                         </div>
 
                         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem" }}>
+                            <div className="responsive-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem" }}>
                                 <div className="form-group">
                                     <label className="form-label" style={{ fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)", marginBottom: "0.75rem" }}>First Name</label>
                                     <input 

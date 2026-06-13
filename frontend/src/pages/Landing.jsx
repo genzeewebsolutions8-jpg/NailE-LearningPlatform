@@ -130,7 +130,7 @@ export default function Landing() {
                             {gallery.map(item => (
                                 <div key={item._id} className="card-premium" style={{ overflow: "hidden", padding: "1rem" }}>
                                     <img 
-                                        src={`http://localhost:5001${item.imageUrl}`} 
+                                        src={item.imageUrl} 
                                         alt={item.instructorId ? `Art by ${item.instructorId.firstName}` : `Art by ${item.artistName || 'Artist'}`}
                                         style={{ width: "100%", height: "250px", objectFit: "cover", borderRadius: "12px", marginBottom: "1rem" }}
                                     />

@@ -7,13 +7,13 @@ const {
     deleteGalleryItem,
 } = require("../controllers/galleryController");
 
-const { protect, adminOnly } = require("../middleware/authMiddleware");
+const { protect, instructorOrAdmin } = require("../middleware/authMiddleware");
 const imageUpload = require("../middleware/imageUploadMiddleware");
 
 // Routes
-router.post("/", protect, adminOnly, imageUpload.single("image"), addGalleryItem);
+router.post("/", protect, instructorOrAdmin, imageUpload.single("image"), addGalleryItem);
 router.get("/", getGalleryItems);
 router.get("/instructor/:instructorId", getInstructorGallery);
-router.delete("/:id", protect, adminOnly, deleteGalleryItem);
+router.delete("/:id", protect, instructorOrAdmin, deleteGalleryItem);
 
 module.exports = router;
